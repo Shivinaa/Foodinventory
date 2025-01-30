@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "96327654736",
+    "project_id": "foodinventory-8f2ad",
+    "storage_bucket": "foodinventory-8f2ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96327654736:android:e599b428b033e2ec4d6055",
+        "android_client_info": {
+          "package_name": "com.example.food_inventory_tracking_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCveB1cS6WouEECEa2R6xF3apcVp4Qry8o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
