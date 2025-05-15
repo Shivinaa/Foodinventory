@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:food_inventory_tracking_app/firebase_options.dart';
+import 'package:food_inventory_tracking_app/pages/Inventory/add_inventory.dart';
+import 'package:food_inventory_tracking_app/pages/Inventory/inventory.dart';
 import 'package:food_inventory_tracking_app/pages/auth/login_page.dart';
-import 'package:food_inventory_tracking_app/pages/chatbot/chatbot.dart';
+import 'package:food_inventory_tracking_app/pages/bottom_navigation/bottom_navigation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const ChatPage(),
+      home: BottomNavigation(),
     );
   }
 }
