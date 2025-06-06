@@ -5,11 +5,15 @@ import 'package:food_inventory_tracking_app/pages/Inventory/add_inventory.dart';
 import 'package:food_inventory_tracking_app/pages/Inventory/inventory.dart';
 import 'package:food_inventory_tracking_app/pages/auth/login_page.dart';
 import 'package:food_inventory_tracking_app/pages/bottom_navigation/bottom_navigation.dart';
+import 'package:food_inventory_tracking_app/pages/recipe/provider/recipe_provider.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => RecipeProvider())],
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

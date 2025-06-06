@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:food_inventory_tracking_app/pages/recipe/model/reciperesponse.dart';
+import 'package:food_inventory_tracking_app/pages/recipe/provider/recipe_provider.dart';
 import 'package:food_inventory_tracking_app/pages/recipe/recipe_detail.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -188,7 +190,7 @@ class HomePage extends StatelessWidget {
   Widget _buildMealButton(
       String mealType, IconData icon, BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         final Response testResponse = Response(
           type: 'Dessert',
           recipeName: 'Chocolate Chip Cookies',
@@ -249,10 +251,16 @@ class HomePage extends StatelessWidget {
           notes:
               'These cookies stay soft and chewy for days. Perfect with a glass of milk!',
         );
+        final prompt = "Generate a light quick recipe for $mealType";
+
+        final res = await context.read<RecipeProvider>().generateRecipe(prompt);
+        final formatted = responseModelFromJson(
+          res.substring(7, res.length - 3),
+        );
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => RecipeCard(recipe: testResponse)));
+                builder: (context) => RecipeCard(recipe: formatted.response!)));
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF55AB55),

@@ -1,16 +1,16 @@
 import 'dart:convert';
 
-ChatResponse responseModelFromJson(String str) =>
-    ChatResponse.fromJson(json.decode(str));
+RecipeResponse responseModelFromJson(String str) =>
+    RecipeResponse.fromJson(json.decode(str));
 
-String responseModelToJson(ChatResponse data) => json.encode(data.toJson());
+String responseModelToJson(RecipeResponse data) => json.encode(data.toJson());
 
-class ChatResponse {
+class RecipeResponse {
   final Response? response;
 
-  ChatResponse({this.response});
+  RecipeResponse({this.response});
 
-  factory ChatResponse.fromJson(Map<String, dynamic> json) => ChatResponse(
+  factory RecipeResponse.fromJson(Map<String, dynamic> json) => RecipeResponse(
         response: json["response"] == null
             ? null
             : Response.fromJson(json["response"]),
