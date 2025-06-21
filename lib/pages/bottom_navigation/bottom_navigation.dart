@@ -4,16 +4,16 @@ import 'package:food_inventory_tracking_app/pages/chatbot/chatbot.dart';
 import 'package:food_inventory_tracking_app/pages/home/homepage.dart';
 import 'package:food_inventory_tracking_app/pages/profile/profile_page.dart';
 
-class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({super.key});
+class BottomNavigationPage extends StatefulWidget {
+  const BottomNavigationPage({super.key});
 
   @override
-  State<BottomNavigation> createState() => _BottomNavigationState();
+  State<BottomNavigationPage> createState() => _BottomNavigationPageState();
 }
 
-class _BottomNavigationState extends State<BottomNavigation> {
+class _BottomNavigationPageState extends State<BottomNavigationPage> {
   int currentindex = 0;
-  final List<Widget> _pages = [
+  final List<Widget> _pages = const [
     HomePage(), //inventory and interactive elements
     ChatPage(),
     InventoryPage(),

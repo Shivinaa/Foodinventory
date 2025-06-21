@@ -1,28 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: const Color(0xFF55ab55), // Updated green color
-        scaffoldBackgroundColor: Colors.grey[100],
-      ),
-      home: ProfilePage(),
-    );
-  }
-}
-
 class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
   @override
   Widget build(BuildContext context) {
+    var auth = FirebaseAuth.instance.currentUser;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF55ab55), // Changed to updated green
@@ -41,62 +25,32 @@ class ProfilePage extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.only(top: 20, bottom: 30),
-            decoration: const BoxDecoration(
-              color: Color(0xFF55ab55), // Changed to updated green
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
-              ),
-            ),
+            // decoration: const BoxDecoration(
+            //   color: Color(0xFF55ab55), // Changed to updated green
+            //   borderRadius: BorderRadius.only(
+            //     bottomLeft: Radius.circular(30),
+            //     bottomRight: Radius.circular(30),
+            //   ),
+            // ),
             child: Column(
               children: [
-                Stack(
-                  children: [
-                    const CircleAvatar(
-                      radius: 50,
-                      backgroundImage:
-                          AssetImage('assets/profile.jpg'), // Change as needed
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        height: 35,
-                        width: 35,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.add_a_photo,
-                          size: 20,
-                          color: const Color(
-                              0xFF55ab55), // Changed to updated green
-                        ),
-                      ),
-                    ),
-                  ],
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage(
+                      "https://api.dicebear.com/9.x/adventurer/png?seed=${auth!.displayName.toString()}"), // Change as needed
                 ),
                 const SizedBox(height: 15),
-                const Text(
-                  'Name',
-                  style: TextStyle(
-                    color: Colors.white,
+                Text(
+                  auth.displayName.toString(),
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 5),
-                const Text(
-                  'Email',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                Text(
+                  auth.email.toString(),
+                  style: const TextStyle(fontSize: 16),
                 ),
               ],
             ),
@@ -145,7 +99,7 @@ class SectionTitle extends StatelessWidget {
 class ProfileMenuItem extends StatelessWidget {
   final String title;
   final IconData icon;
-  const ProfileMenuItem({required this.title, required this.icon});
+  const ProfileMenuItem({super.key, required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {

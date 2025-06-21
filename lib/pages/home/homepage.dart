@@ -1,11 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:food_inventory_tracking_app/pages/recipe/model/reciperesponse.dart';
-import 'package:food_inventory_tracking_app/pages/recipe/provider/recipe_provider.dart';
+import 'package:food_inventory_tracking_app/pages/Inventory/provider/inventory_provider.dart';
 import 'package:food_inventory_tracking_app/pages/recipe/recipe_detail.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +78,7 @@ class HomePage extends StatelessWidget {
                 // Quick Recipe Generator Section
                 _buildSection(
                   title: 'Quick Recipe Generator',
-                  child: _buildMealButtons(context),
+                  child: _buildMealButtons(context, 1),
                 ),
 
                 const SizedBox(height: 16.0),
@@ -85,7 +86,7 @@ class HomePage extends StatelessWidget {
                 // Recipe Generator from Inventory Section
                 _buildSection(
                   title: 'Recipe Generator from Inventory',
-                  child: _buildMealButtons(context),
+                  child: _buildMealButtons(context, 2),
                 ),
               ],
             ),
@@ -169,98 +170,116 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildMealButtons(BuildContext context) {
+  Widget _buildMealButtons(BuildContext context, int id) {
     return Row(
       children: [
         Expanded(
-          child: _buildMealButton('Breakfast', Icons.wb_sunny, context),
+          child: _buildMealButton(id, 'Breakfast', Icons.wb_sunny, context),
         ),
         const SizedBox(width: 12.0),
         Expanded(
-          child: _buildMealButton('Lunch', Icons.restaurant, context),
+          child: _buildMealButton(id, 'Lunch', Icons.restaurant, context),
         ),
         const SizedBox(width: 12.0),
         Expanded(
-          child: _buildMealButton('Dinner', Icons.nightlight_round, context),
+          child:
+              _buildMealButton(id, 'Dinner', Icons.nightlight_round, context),
         ),
       ],
     );
   }
 
   Widget _buildMealButton(
-      String mealType, IconData icon, BuildContext context) {
+      int id, String mealType, IconData icon, BuildContext context) {
     return ElevatedButton(
       onPressed: () async {
-        final Response testResponse = Response(
-          type: 'Dessert',
-          recipeName: 'Chocolate Chip Cookies',
-          cuisine: 'American',
-          servings: 24,
-          prepTime: '15 minutes',
-          cookTime: '10 minutes',
-          ingredients: [
-            Ingredient(item: 'All-purpose flour', quantity: '2 1/4 cups'),
-            Ingredient(item: 'Baking soda', quantity: '1 teaspoon'),
-            Ingredient(item: 'Salt', quantity: '1/2 teaspoon'),
-            Ingredient(item: 'Butter', quantity: '1 cup, softened'),
-            Ingredient(item: 'Granulated sugar', quantity: '3/4 cup'),
-            Ingredient(item: 'Brown sugar', quantity: '3/4 cup, packed'),
-            Ingredient(item: 'Vanilla extract', quantity: '1 teaspoon'),
-            Ingredient(item: 'Eggs', quantity: '2'),
-            Ingredient(item: 'Chocolate chips', quantity: '2 cups'),
-          ],
-          instructions: [
-            Instruction(
-                stepNumber: 1,
-                stepDescription: 'Preheat oven to 375°F (190°C).'),
-            Instruction(
-                stepNumber: 2,
-                stepDescription:
-                    'Combine flour, baking soda, and salt in a small bowl.'),
-            Instruction(
-                stepNumber: 3,
-                stepDescription:
-                    'Beat butter, granulated sugar, brown sugar, and vanilla extract until creamy.'),
-            Instruction(
-                stepNumber: 4,
-                stepDescription:
-                    'Add eggs one at a time, beating well after each addition.'),
-            Instruction(
-                stepNumber: 5,
-                stepDescription: 'Gradually beat in flour mixture.'),
-            Instruction(
-                stepNumber: 6, stepDescription: 'Stir in chocolate chips.'),
-            Instruction(
-                stepNumber: 7,
-                stepDescription:
-                    'Drop by rounded tablespoon onto ungreased baking sheets.'),
-            Instruction(
-                stepNumber: 8,
-                stepDescription:
-                    'Bake for 9-11 minutes or until golden brown.'),
-            Instruction(
-                stepNumber: 9,
-                stepDescription:
-                    'Cool on baking sheets for 2 minutes; remove to wire racks to cool completely.'),
-          ],
-          tips: [
-            'Use room temperature butter for better mixing.',
-            'Don’t overmix the dough after adding flour.',
-            'Chill dough for thicker cookies.',
-          ],
-          notes:
-              'These cookies stay soft and chewy for days. Perfect with a glass of milk!',
-        );
-        final prompt = "Generate a light quick recipe for $mealType";
-
-        final res = await context.read<RecipeProvider>().generateRecipe(prompt);
-        final formatted = responseModelFromJson(
-          res.substring(7, res.length - 3),
-        );
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => RecipeCard(recipe: formatted.response!)));
+        // final Response testResponse = Response(
+        //   type: 'Dessert',
+        //   recipeName: 'Chocolate Chip Cookies',
+        //   cuisine: 'American',
+        //   servings: 24,
+        //   prepTime: '15 minutes',
+        //   cookTime: '10 minutes',
+        //   ingredients: [
+        //     Ingredient(item: 'All-purpose flour', quantity: '2 1/4 cups'),
+        //     Ingredient(item: 'Baking soda', quantity: '1 teaspoon'),
+        //     Ingredient(item: 'Salt', quantity: '1/2 teaspoon'),
+        //     Ingredient(item: 'Butter', quantity: '1 cup, softened'),
+        //     Ingredient(item: 'Granulated sugar', quantity: '3/4 cup'),
+        //     Ingredient(item: 'Brown sugar', quantity: '3/4 cup, packed'),
+        //     Ingredient(item: 'Vanilla extract', quantity: '1 teaspoon'),
+        //     Ingredient(item: 'Eggs', quantity: '2'),
+        //     Ingredient(item: 'Chocolate chips', quantity: '2 cups'),
+        //   ],
+        //   instructions: [
+        //     Instruction(
+        //         stepNumber: 1,
+        //         stepDescription: 'Preheat oven to 375°F (190°C).'),
+        //     Instruction(
+        //         stepNumber: 2,
+        //         stepDescription:
+        //             'Combine flour, baking soda, and salt in a small bowl.'),
+        //     Instruction(
+        //         stepNumber: 3,
+        //         stepDescription:
+        //             'Beat butter, granulated sugar, brown sugar, and vanilla extract until creamy.'),
+        //     Instruction(
+        //         stepNumber: 4,
+        //         stepDescription:
+        //             'Add eggs one at a time, beating well after each addition.'),
+        //     Instruction(
+        //         stepNumber: 5,
+        //         stepDescription: 'Gradually beat in flour mixture.'),
+        //     Instruction(
+        //         stepNumber: 6, stepDescription: 'Stir in chocolate chips.'),
+        //     Instruction(
+        //         stepNumber: 7,
+        //         stepDescription:
+        //             'Drop by rounded tablespoon onto ungreased baking sheets.'),
+        //     Instruction(
+        //         stepNumber: 8,
+        //         stepDescription:
+        //             'Bake for 9-11 minutes or until golden brown.'),
+        //     Instruction(
+        //         stepNumber: 9,
+        //         stepDescription:
+        //             'Cool on baking sheets for 2 minutes; remove to wire racks to cool completely.'),
+        //   ],
+        //   tips: [
+        //     'Use room temperature butter for better mixing.',
+        //     'Don’t overmix the dough after adding flour.',
+        //     'Chill dough for thicker cookies.',
+        //   ],
+        //   notes:
+        //       'These cookies stay soft and chewy for days. Perfect with a glass of milk!',
+        // );
+        String prompt;
+        if (id == 1) {
+          prompt = "Generate a quick light recipe for $mealType";
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => RecipeCard(
+                        prompt: prompt,
+                      )));
+        } else {
+          var inventories = context.read<InventoryProvider>().inventoryItems;
+          if (inventories.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No Items in your inventory')));
+          } else {
+            List<String> itemNames = inventories.map((e) => e.name).toList();
+            log(itemNames.toString());
+            prompt =
+                "Generate a recipe based on my inventory. these are the items are currently in my inventory ${itemNames.toString()} for $mealType";
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => RecipeCard(
+                          prompt: prompt,
+                        )));
+          }
+        }
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF55AB55),

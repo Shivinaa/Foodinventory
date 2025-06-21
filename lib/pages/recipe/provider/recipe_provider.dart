@@ -6,11 +6,16 @@ import 'package:food_inventory_tracking_app/pages/recipe/model/reciperesponse.da
 import 'package:http/http.dart' as http;
 
 class RecipeProvider with ChangeNotifier {
+  bool _loading = false;
+  bool get loading => _loading;
   static const geminiKey = "AIzaSyAVzg2G3WPSLViQUglnzaQ7IBzHQ1CkSfk";
   RecipeResponse? _recipeResponse;
   RecipeResponse? get recipeResponse => _recipeResponse;
 
   Future<String> generateRecipe(String prompt) async {
+    _loading = true;
+    notifyListeners();
+
     try {
       final res = await http.post(
         Uri.parse(
@@ -111,10 +116,14 @@ class RecipeProvider with ChangeNotifier {
       if (res.statusCode == 200) {
         String val = jsonDecode(res.body)['candidates'][0]['content']['parts']
             [0]['text'];
+        // final formatted = responseModelFromJson(
+        //   val.substring(7, val.length - 3).trim(),
+        // );
 
-        final formatted = responseModelFromJson(
-          val.substring(7, val.length - 3),
-        );
+        String cleanedJson =
+            val.replaceAll('json', '').replaceAll('`', '').trim();
+        final formatted = responseModelFromJson(cleanedJson);
+        log(cleanedJson);
 
         _recipeResponse = formatted;
 
@@ -126,6 +135,9 @@ class RecipeProvider with ChangeNotifier {
     } catch (e) {
       log(e.toString());
       return e.toString();
+    } finally {
+      _loading = false;
+      notifyListeners();
     }
   }
 }

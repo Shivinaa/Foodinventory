@@ -3,23 +3,10 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:food_inventory_tracking_app/pages/Inventory/add_inventory.dart';
+import 'package:food_inventory_tracking_app/pages/Inventory/data/inventory_data.dart';
+import 'package:food_inventory_tracking_app/pages/Inventory/provider/inventory_provider.dart';
 import 'package:intl/intl.dart';
-
-class FoodItem {
-  final String name;
-  final String category;
-  final int quantity;
-  final Timestamp expiryDate;
-  final String notes;
-
-  FoodItem({
-    required this.name,
-    required this.category,
-    required this.quantity,
-    required this.expiryDate,
-    this.notes = '',
-  });
-}
+import 'package:provider/provider.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -73,30 +60,6 @@ class _InventoryPageState extends State<InventoryPage> {
   ];
   String _searchQuery = '';
 
-  List<FoodItem> _filteredItems = [];
-
-  Future<List<FoodItem>> _getfilteredItems() async {
-    final res = await FirebaseFirestore.instance.collection('inventory').get();
-    final fooditems = res.docs
-        .map((e) => FoodItem(
-            name: e.data()['itemName'],
-            category: e.data()['category'],
-            quantity: e.data()['quantity'],
-            expiryDate: e.data()['expirydate']))
-        .toList();
-    final list = fooditems.where((item) {
-      final matchesCategory =
-          _selectedCategory == 'All' || item.category == _selectedCategory;
-      final matchesSearch =
-          item.name.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    }).toList();
-
-    _filteredItems = list;
-    setState(() {});
-    return _filteredItems;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,8 +99,10 @@ class _InventoryPageState extends State<InventoryPage> {
         onPressed: () {
           // Navigate to the add item form page
           // You mentioned you already have this form
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddInventoryPage()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const AddInventoryPage()));
         },
         backgroundColor: Colors.lightBlue[300],
         child: const Icon(Icons.add, color: Colors.white),
@@ -213,162 +178,145 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   Widget _buildInventoryList() {
-    return FutureBuilder(
-        future: FirebaseFirestore.instance.collection('inventory').get(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data != null) {
-            final itemList = snapshot.data!.docs
-                .map((e) => FoodItem(
-                    name: e.data()['itemName'],
-                    category: e.data()['category'],
-                    quantity: e.data()['quantity'],
-                    expiryDate: e.data()['expirydate']))
-                .toList();
-            log(itemList.length.toString());
-            return Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.only(bottom: 80),
-                itemCount: itemList.length,
-                itemBuilder: (context, index) {
-                  final item = itemList[index];
-                  // Check expiry date for color coding
-                  final expiryDate = item.expiryDate.toDate();
-                  final daysRemaining =
-                      expiryDate.difference(DateTime.now()).inDays;
+    return Consumer<InventoryProvider>(builder: (context, provider, _) {
+      if (provider.loading) {
+        return const CircularProgressIndicator();
+      }
+      if (provider.inventoryItems.isNotEmpty) {
+        final itemList = provider.inventoryItems;
+        log(itemList.length.toString());
+        return Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.only(bottom: 80),
+            itemCount: itemList.length,
+            itemBuilder: (context, index) {
+              final item = itemList[index];
+              // Check expiry date for color coding
+              final expiryDate = item.expiryDate.toDate();
+              final daysRemaining =
+                  expiryDate.difference(DateTime.now()).inDays;
 
-                  Color borderColor = Colors.green;
-                  if (daysRemaining < 0) {
-                    borderColor = Colors.red;
-                  } else if (daysRemaining < 3) {
-                    borderColor = Colors.orange;
-                  } else if (daysRemaining < 7) {
-                    borderColor = Colors.yellow;
-                  }
+              Color borderColor = Colors.green;
+              if (daysRemaining < 0) {
+                borderColor = Colors.red;
+              } else if (daysRemaining < 3) {
+                borderColor = Colors.orange;
+              } else if (daysRemaining < 7) {
+                borderColor = Colors.yellow;
+              }
 
-                  return Card(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: borderColor, width: 1.5),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: borderColor, width: 1.5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Category icon
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.green[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: _getCategoryIcon(item.category),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Item details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Category: ${item.category}',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Expiry: ${DateFormat("dd/MM/yyyy").format(item.expiryDate.toDate())}',
+                              style: TextStyle(
+                                color: daysRemaining < 0
+                                    ? Colors.red
+                                    : daysRemaining < 3
+                                        ? Colors.orange
+                                        : Colors.grey[600],
+                                fontWeight: daysRemaining < 7
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Quantity indicator
+                      Container(
+                        width: 35,
+                        height: 35,
+                        decoration: BoxDecoration(
+                          color: Colors.lightBlue[100],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${item.quantity}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[800],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Actions
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Category icon
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.green[100],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: _getCategoryIcon(item.category),
-                            ),
+                          IconButton(
+                            icon: const Icon(Icons.edit_outlined,
+                                color: Colors.blue),
+                            onPressed: () {
+                              // Edit item functionality
+                            },
+                            iconSize: 22,
                           ),
-                          const SizedBox(width: 12),
-                          // Item details
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.name,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Category: ${item.category}',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Expiry: ${DateFormat("dd/MM/yyyy").format(item.expiryDate.toDate())}',
-                                  style: TextStyle(
-                                    color: daysRemaining < 0
-                                        ? Colors.red
-                                        : daysRemaining < 3
-                                            ? Colors.orange
-                                            : Colors.grey[600],
-                                    fontWeight: daysRemaining < 7
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                                if (item.notes.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      'Notes: ${item.notes}',
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          // Quantity indicator
-                          Container(
-                            width: 35,
-                            height: 35,
-                            decoration: BoxDecoration(
-                              color: Colors.lightBlue[100],
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${item.quantity}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue[800],
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Actions
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined,
-                                    color: Colors.blue),
-                                onPressed: () {
-                                  // Edit item functionality
-                                },
-                                iconSize: 22,
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline,
-                                    color: Colors.red),
-                                onPressed: () {
-                                  _confirmDelete(item);
-                                },
-                                iconSize: 22,
-                              ),
-                            ],
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline,
+                                color: Colors.red),
+                            onPressed: () {
+                              _confirmDelete(item);
+                            },
+                            iconSize: 22,
                           ),
                         ],
                       ),
-                    ),
-                  );
-                },
-              ),
-            );
-          }
-          return const CircularProgressIndicator();
-        });
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }
+      return const Expanded(child: Center(child: Text("No Items added")));
+    });
   }
 
   Widget _getCategoryIcon(String category) {
@@ -398,7 +346,7 @@ class _InventoryPageState extends State<InventoryPage> {
     return Icon(iconData, color: Colors.green[700]);
   }
 
-  void _confirmDelete(FoodItem item) {
+  void _confirmDelete(FoodItemModel item) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -414,18 +362,20 @@ class _InventoryPageState extends State<InventoryPage> {
             ),
           ),
           TextButton(
-            onPressed: () {
-              // setState(() {
-              //   _foodItems.removeWhere((i) => i.name == item.name);
-              // });
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${item.name} removed from inventory'),
-                  backgroundColor: Colors.red[400],
-                  duration: const Duration(seconds: 2),
-                ),
-              );
+            onPressed: () async {
+              await context
+                  .read<InventoryProvider>()
+                  .deleteItemToInventory(item.id!);
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${item.name} removed from inventory'),
+                    backgroundColor: Colors.red[400],
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
             },
             child: const Text(
               'Delete',
