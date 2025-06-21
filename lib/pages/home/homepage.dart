@@ -254,13 +254,14 @@ class HomePage extends StatelessWidget {
         final prompt = "Generate a light quick recipe for $mealType";
 
         final res = await context.read<RecipeProvider>().generateRecipe(prompt);
-        final formatted = responseModelFromJson(
-          res.substring(7, res.length - 3),
-        );
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => RecipeCard(recipe: formatted.response!)));
+        print(res);
+        // final formatted = responseModelFromJson(
+        //   res.substring(7, res.length - 3),
+        // );
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => RecipeCard(recipe: formatted.response!)));
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF55AB55),

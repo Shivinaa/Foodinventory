@@ -112,11 +112,11 @@ class RecipeProvider with ChangeNotifier {
         String val = jsonDecode(res.body)['candidates'][0]['content']['parts']
             [0]['text'];
 
-        final formatted = responseModelFromJson(
-          val.substring(7, val.length - 3),
-        );
+        // final formatted = responseModelFromJson(
+        //   val.substring(7, val.length - 3),
+        // );
 
-        _recipeResponse = formatted;
+        // _recipeResponse = formatted;
 
         notifyListeners();
         return val;
