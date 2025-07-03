@@ -1,4 +1,4 @@
-package com.example.food_inventory_tracking_app
+package com.digipantry.app
 
 import io.flutter.embedding.android.FlutterActivity
 

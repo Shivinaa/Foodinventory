@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:food_inventory_tracking_app/pages/chatbot/provider/geminiprovider.dart';
 
 class ChatPage extends StatefulWidget {
@@ -175,15 +178,19 @@ class _ChatPageState extends State<ChatPage> {
                                             ),
                                           ],
                                         ),
-                                        child: Text(
-                                          message,
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            color: isUser
-                                                ? Colors.white
-                                                : const Color(0xFF333333),
-                                            height: 1.4,
-                                          ),
+                                        child: MarkdownBody(
+                                          data: message,
+                                          selectable: true,
+                                          styleSheet: isUser
+                                              ? MarkdownStyleSheet(
+                                                  p: const TextStyle(
+                                                      color: Colors.white),
+                                                  strong: const TextStyle(
+                                                      color: Colors.white),
+                                                  em: const TextStyle(
+                                                      color: Colors.white),
+                                                )
+                                              : null,
                                         ),
                                       ),
                                     ),
@@ -207,91 +214,181 @@ class _ChatPageState extends State<ChatPage> {
                           ),
                   );
                 }),
-            Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: Color(0xFFEEEEEE),
-                    width: 1.0,
-                  ),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: Colors.grey.shade300,
+            ListenableBuilder(
+                listenable: geminiApi,
+                builder: (context, _) {
+                  if (geminiApi.loading) {
+                    return const TypingIndicator();
+                  }
+                  return Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                        top: BorderSide(
+                          color: Color(0xFFEEEEEE),
                           width: 1.0,
                         ),
                       ),
-                      child: TextField(
-                        controller: _controller,
-                        maxLines: null,
-                        textInputAction: TextInputAction.send,
-                        decoration: InputDecoration(
-                          hintText: "Ask about food inventory...",
-                          hintStyle: TextStyle(color: Colors.grey.shade500),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 14,
-                          ),
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              Icons.mic_rounded,
-                              color: Colors.grey.shade500,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                                width: 1.0,
+                              ),
                             ),
-                            onPressed: () {
-                              // Voice input functionality could be added here
-                            },
+                            child: TextField(
+                              controller: _controller,
+                              maxLines: null,
+                              textInputAction: TextInputAction.send,
+                              decoration: InputDecoration(
+                                hintText: "Ask about food inventory...",
+                                hintStyle:
+                                    TextStyle(color: Colors.grey.shade500),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 14,
+                                ),
+                                border: InputBorder.none,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    Icons.mic_rounded,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                  onPressed: () {
+                                    // Voice input functionality could be added here
+                                  },
+                                ),
+                              ),
+                              onSubmitted: (value) => _sendMessage(),
+                            ),
                           ),
                         ),
-                        onSubmitted: (value) => _sendMessage(),
-                      ),
+                        const SizedBox(width: 10),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: _controller.text.isEmpty
+                                ? Colors.grey.shade200
+                                : primaryColor,
+                            shape: BoxShape.circle,
+                            boxShadow: _controller.text.isEmpty
+                                ? null
+                                : [
+                                    BoxShadow(
+                                      color: primaryColor.withOpacity(0.4),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                          ),
+                          child: IconButton(
+                            onPressed: _sendMessage,
+                            icon: Icon(
+                              Icons.send_rounded,
+                              color: _controller.text.isEmpty
+                                  ? Colors.grey.shade500
+                                  : Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: _controller.text.isEmpty
-                          ? Colors.grey.shade200
-                          : primaryColor,
-                      shape: BoxShape.circle,
-                      boxShadow: _controller.text.isEmpty
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: primaryColor.withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                    ),
-                    child: IconButton(
-                      onPressed: _sendMessage,
-                      icon: Icon(
-                        Icons.send_rounded,
-                        color: _controller.text.isEmpty
-                            ? Colors.grey.shade500
-                            : Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                  );
+                }),
           ],
         ),
       ),
+    );
+  }
+}
+
+class TypingIndicator extends StatefulWidget {
+  const TypingIndicator({super.key});
+
+  @override
+  State<TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<TypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Row(
+                children: List.generate(3, (index) {
+                  final animation = Tween(begin: 0.0, end: 1.0).animate(
+                    CurvedAnimation(
+                      parent: _controller,
+                      curve: Interval(
+                        index * 0.33,
+                        (index + 1) * 0.33,
+                        curve: Curves.easeInOut,
+                      ),
+                    ),
+                  );
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: Transform.translate(
+                      offset: Offset(0,
+                          -2 * animation.value * sin(animation.value * 3.14)),
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.white70 : Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

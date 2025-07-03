@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:food_inventory_tracking_app/pages/Inventory/provider/inventory_provider.dart';
 import 'package:food_inventory_tracking_app/pages/recipe/recipe_detail.dart';
@@ -21,8 +20,9 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 32.0),
             child: const Column(
               children: [
+                SizedBox(height: 20.0),
                 Text(
-                  'Food Ledger',
+                  'Digi Pantry',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 36.0,
@@ -36,6 +36,7 @@ class HomePage extends StatelessWidget {
                     color: Colors.white,
                     fontSize: 16.0,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -57,20 +58,29 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 16.0),
 
                 // Recent Expiry Items Section
-                _buildSection(
-                  title: 'Recent Expiry Items from Inventory',
-                  child: Column(
-                    children: [
-                      _buildExpiryItem('Milk', '2 days left',
-                          const Color.fromARGB(255, 234, 94, 108)),
-                      const SizedBox(height: 8.0),
-                      _buildExpiryItem('Bread', '5 days left',
-                          const Color.fromARGB(255, 236, 195, 134)),
-                      const SizedBox(height: 8.0),
-                      _buildExpiryItem(
-                          'Yogurt', '1 week left', Colors.yellow.shade100),
-                    ],
-                  ),
+                Consumer<InventoryProvider>(
+                  builder: (context, provider, _) {
+                    var expiry = provider.expiryItems;
+                    if (expiry.isEmpty) {
+                      return const SizedBox();
+                    }
+                    return _buildSection(
+                        title: 'Recent Expiry Items from Inventory',
+                        child: Column(
+                          children: expiry
+                              .map(
+                                (food) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: _buildExpiryItem(
+                                    food.name,
+                                    "${food.expiryDate.toDate().difference(DateTime.now()).inDays} days left",
+                                    Colors.green.shade400,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ));
+                  },
                 ),
 
                 const SizedBox(height: 16.0),
@@ -156,6 +166,7 @@ class HomePage extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16.0,
               fontWeight: FontWeight.w500,
+              color: Colors.white,
             ),
           ),
           Text(

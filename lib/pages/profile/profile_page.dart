@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:food_inventory_tracking_app/pages/auth/login_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -58,14 +59,29 @@ class ProfilePage extends StatelessWidget {
           const SizedBox(height: 20),
           Expanded(
             child: ListView(
-              children: const [
-                SectionTitle(title: "CONTENT"),
-                ProfileMenuItem(title: "Phone Number", icon: Icons.phone),
-                ProfileMenuItem(title: "Saved Recipes", icon: Icons.bookmark),
-                ProfileMenuItem(title: "FAQ's", icon: Icons.help),
+              children: [
+                // SectionTitle(title: "CONTENT"),
+                // ProfileMenuItem(title: "Phone Number", icon: Icons.phone),
+                // ProfileMenuItem(title: "Saved Recipes", icon: Icons.bookmark),
+                // ProfileMenuItem(title: "FAQ's", icon: Icons.help),
+                // ProfileMenuItem(
+                //     title: "Shopping List", icon: Icons.shopping_cart),
                 ProfileMenuItem(
-                    title: "Shopping List", icon: Icons.shopping_cart),
-                ProfileMenuItem(title: "Logout", icon: Icons.exit_to_app),
+                  title: "Logout",
+                  icon: Icons.exit_to_app,
+                  ontap: () async {
+                    await FirebaseAuth.instance.signOut();
+
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                          (route) => false);
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -77,7 +93,7 @@ class ProfilePage extends StatelessWidget {
 
 class SectionTitle extends StatelessWidget {
   final String title;
-  const SectionTitle({required this.title});
+  const SectionTitle({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +115,9 @@ class SectionTitle extends StatelessWidget {
 class ProfileMenuItem extends StatelessWidget {
   final String title;
   final IconData icon;
-  const ProfileMenuItem({super.key, required this.title, required this.icon});
+  final VoidCallback? ontap;
+  const ProfileMenuItem(
+      {super.key, required this.title, required this.icon, this.ontap});
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +148,7 @@ class ProfileMenuItem extends StatelessWidget {
           size: 16,
           color: Color(0xFF55ab55), // Changed to updated green
         ),
-        onTap: () {},
+        onTap: ontap,
       ),
     );
   }

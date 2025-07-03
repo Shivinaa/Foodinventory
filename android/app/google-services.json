@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:96327654736:android:e599b428b033e2ec4d6055",
+        "mobilesdk_app_id": "1:96327654736:android:921167f2943e89ac4d6055",
         "android_client_info": {
-          "package_name": "com.example.food_inventory_tracking_app"
+          "package_name": "com.digipantry.app"
         }
       },
       "oauth_client": [],

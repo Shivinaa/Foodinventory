@@ -7,7 +7,12 @@ import 'package:http/http.dart' as http;
 class Geminiprovider with ChangeNotifier {
   final List<Map<String, dynamic>> chat = [];
   static const geminiKey = "AIzaSyAVzg2G3WPSLViQUglnzaQ7IBzHQ1CkSfk";
+
+  bool _loading = false;
+  bool get loading => _loading;
   Future<String> chatWithGemini() async {
+    _loading = true;
+    notifyListeners();
     try {
       final res = await http.post(
         Uri.parse(
@@ -47,6 +52,9 @@ class Geminiprovider with ChangeNotifier {
     } catch (e) {
       log(e.toString());
       return e.toString();
+    } finally {
+      _loading = false;
+      notifyListeners();
     }
   }
 }

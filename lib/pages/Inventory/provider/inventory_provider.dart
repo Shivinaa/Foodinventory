@@ -14,6 +14,11 @@ class InventoryProvider with ChangeNotifier {
 
   List<FoodItemModel> _inventoryItems = [];
   List<FoodItemModel> get inventoryItems => _inventoryItems;
+  List<FoodItemModel> _filteredItems = [];
+  List<FoodItemModel> get filteredItems => _filteredItems;
+
+  List<FoodItemModel> _expiryItems = [];
+  List<FoodItemModel> get expiryItems => _expiryItems;
 
   Future<void> getInventory() async {
     _loading = true;
@@ -30,6 +35,8 @@ class InventoryProvider with ChangeNotifier {
         return FoodItemModel.fromMap(food);
       }).toList();
       _inventoryItems = items;
+      _filteredItems = items;
+      getExpiredItems();
     } catch (e) {
       log(e.toString());
       _error = e.toString();
@@ -37,6 +44,30 @@ class InventoryProvider with ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
+  }
+
+  getFilteredItems(String query) {
+    if (query.isEmpty || query == "All") {
+      _filteredItems = _inventoryItems;
+    } else {
+      _filteredItems = _inventoryItems.where((food) {
+        return food.name.toLowerCase().contains(query.toLowerCase()) ||
+            food.category.toLowerCase().contains(query.toLowerCase());
+      }).toList();
+    }
+
+    notifyListeners();
+  }
+
+  getExpiredItems() {
+    _expiryItems = _inventoryItems;
+    _expiryItems.removeWhere(
+        (food) => food.expiryDate.toDate().isBefore(DateTime.now()));
+    _expiryItems.sort((a, b) {
+      return a.expiryDate.compareTo(b.expiryDate);
+    });
+    _expiryItems = _expiryItems.take(3).toList();
+    notifyListeners();
   }
 
   Future addItemsToInventory(Map<String, dynamic> item) async {

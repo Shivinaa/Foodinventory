@@ -138,9 +138,7 @@ class _InventoryPageState extends State<InventoryPage> {
               contentPadding: const EdgeInsets.symmetric(vertical: 0),
             ),
             onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
+              context.read<InventoryProvider>().getFilteredItems(value);
             },
           ),
           const SizedBox(height: 10),
@@ -160,6 +158,9 @@ class _InventoryPageState extends State<InventoryPage> {
                       setState(() {
                         _selectedCategory = category;
                       });
+                      context
+                          .read<InventoryProvider>()
+                          .getFilteredItems(category);
                     },
                     selectedColor: Colors.lightBlue[100],
                     backgroundColor: Colors.white,
@@ -182,8 +183,8 @@ class _InventoryPageState extends State<InventoryPage> {
       if (provider.loading) {
         return const CircularProgressIndicator();
       }
-      if (provider.inventoryItems.isNotEmpty) {
-        final itemList = provider.inventoryItems;
+      if (provider.filteredItems.isNotEmpty) {
+        final itemList = provider.filteredItems;
         log(itemList.length.toString());
         return Expanded(
           child: ListView.builder(
@@ -251,13 +252,9 @@ class _InventoryPageState extends State<InventoryPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Expiry: ${DateFormat("dd/MM/yyyy").format(item.expiryDate.toDate())}',
+                              'Expiry: ${DateFormat("dd MMM yyyy").format(item.expiryDate.toDate())}',
                               style: TextStyle(
-                                color: daysRemaining < 0
-                                    ? Colors.red
-                                    : daysRemaining < 3
-                                        ? Colors.orange
-                                        : Colors.grey[600],
+                                color: borderColor,
                                 fontWeight: daysRemaining < 7
                                     ? FontWeight.bold
                                     : FontWeight.normal,
@@ -315,7 +312,27 @@ class _InventoryPageState extends State<InventoryPage> {
           ),
         );
       }
-      return const Expanded(child: Center(child: Text("No Items added")));
+      return Expanded(
+          child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inventory_2_outlined,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No items available',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ));
     });
   }
 

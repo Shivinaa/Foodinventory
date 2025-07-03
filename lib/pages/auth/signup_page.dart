@@ -67,7 +67,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     SizedBox(height: 12),
                     Text(
-                      'Join Food Inventory',
+                      'Join Digi Pantry',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,

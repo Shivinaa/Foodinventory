@@ -48,17 +48,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCwLtO-Wxl_56XoAM2d6ZJq0fJ0KTr-1X4',
-    appId: '1:96327654736:web:0d37d0aeb605c4cc4d6055',
+    appId: '1:96327654736:web:5e021a031f45a4874d6055',
     messagingSenderId: '96327654736',
     projectId: 'foodinventory-8f2ad',
     authDomain: 'foodinventory-8f2ad.firebaseapp.com',
     storageBucket: 'foodinventory-8f2ad.firebasestorage.app',
-    measurementId: 'G-174QKWCVKH',
+    measurementId: 'G-YDC7ECDEH6',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCveB1cS6WouEECEa2R6xF3apcVp4Qry8o',
-    appId: '1:96327654736:android:e599b428b033e2ec4d6055',
+    appId: '1:96327654736:android:921167f2943e89ac4d6055',
     messagingSenderId: '96327654736',
     projectId: 'foodinventory-8f2ad',
     storageBucket: 'foodinventory-8f2ad.firebasestorage.app',
